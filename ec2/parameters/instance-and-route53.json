@@ -1,0 +1,18 @@
+[
+  {
+    "ParameterKey": "KeyName",
+    "ParameterValue": "cloudformation"
+  },
+  {
+    "ParameterKey": "InstanceType",
+    "ParameterValue": "t2.micro"
+  },
+  {
+    "ParameterKey": "HostedZoneName",
+    "ParameterValue": "enopits.com."
+  },
+  {
+    "ParameterKey": "Subdomain",
+    "ParameterValue": "hello"
+  }
+]
