@@ -1,0 +1,86 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Create EC2 Instance
+Parameters:
+  Environment:
+    Type: String
+    Description: Used for miscellaneous object names and tags
+    AllowedValues:
+      - "dev"
+      - "test"
+      - "qa"
+      - "prod"
+    Default: dev
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+    - t2.micro
+    - t2.small
+    - t2.medium
+    - t2.large
+    ConstraintDescription: must be a valid EC2 instance type.
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instances
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 KeyPair
+  EC2SubnetId:
+    Description: Name of an existing Subnet ID 
+    Type: String  
+  EC2SecurityGroups:
+    Type: CommaDelimitedList
+    Description: public access
+  EC2ImageId:
+    Type: String
+    Description: ImageId for ec2-instance
+    Default: ami-0a8e041c1ddc093ed
+ 
+Resources: 
+  EC2Instance: 
+    DependsOn:
+      - EIPAddress
+    
+    Type: "AWS::EC2::Instance"
+    Properties: 
+      ImageId: !Ref EC2ImageId
+      InstanceType: !Ref InstanceType
+      SecurityGroupIds: !Ref EC2SecurityGroups
+      KeyName: !Ref KeyName
+      SubnetId: !Ref EC2SubnetId
+      Tags:
+        - Key: Name
+          Value: !Join ["", ["ubuntu_instance_", !Ref Environment]]
+      
+  EIPAddress:
+    Type: AWS::EC2::EIP
+  EIPAssoc:
+    DependsOn:
+      - EC2Instance
+      - EIPAddress
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      InstanceId: !Ref EC2Instance
+      EIP: !Ref EIPAddress
+Outputs:
+
+  InstanceId:
+    Description: InstanceId of the newly created EC2 instance
+    Value:
+      Ref: EC2Instance
+  PublicDNS:
+    Description: Public DNSName of the newly created EC2 instance
+    Value:
+      Fn::GetAtt:
+      - EC2Instance
+      - PublicDnsName
+  PublicIP:
+    Description: Public IP address of the newly created EC2 instance
+    Value:
+      Fn::GetAtt:
+      - EC2Instance
+      - PublicIp
+  EIPAddress:
+    Description: EIP-address of ec2-instance
+    Value: 
+      Ref: EIPAddress
